@@ -1,18 +1,19 @@
+//Runs when code loads
 $(document).ready(function(){
-
+//sends an ajax request to GET friends stored in the database
     $.ajax({
         url: 'http://rest.learncode.academy/api/1150/friends',
         type: 'GET'
     }).done( (data) => {
         data.forEach((eachFriend) => {
-            let name = eachFriend.firstName + " " + eachFriend.lastName;
-            let newElement = createFriend(name);
-            $('#friend-list').append(newElement);
+            let name = eachFriend.firstName + " " + eachFriend.lastName;//sets name
+            let newElement = createFriend(name, eachFriend.id);//calls createFriend function with name/id number
+            $('#friend-list').append(newElement);//prints to the DOM
         })
     }).fail( () => {
         alert('AJAX call failed, unable to retrieve friends.');
     })
-
+//onclick function
     $('#friend-form').submit( (e => {
         e.preventDefault();
         let newFriend = $('#input').val();
@@ -29,21 +30,31 @@ $(document).ready(function(){
                 email: `${firstName}@${lastName}.com`
             }
         }).done( (data) => {
-            console.log(data);
+            let newElement = createFriend(newFriend, data.id);//adds id number to typed input
+            $('#friend-list').append(newElement);
+            $('#input').val('');//clear the input field
         }).fail( () => {
-            alert('AJAX call failed, unable to post new friend.');
+            alert('AJAX call failed, unable to POST new friend.');
         })
-        let newElement = createFriend(newFriend);
-        $('#friend-list').append(newElement);
-        $('#input').val('');
+        
     }));
-
+//constructs an ajax request to DELETE friends from server
     $('#friend-list').on('click', 'li', function(e) {
-        $(this).remove();
+        $.ajax({
+            url: `http://rest.learncode.academy/api/1150/friends/${e.target.id}`,//adds target id 
+            type: 'DELETE'
+        }).done( () => {
+            $(this).remove();
+        }).fail( () => {
+            alert('AJAX call failed, unable to DELETE friend.');
+        })
     })
+       
 
-    function createFriend(name) {
-        return $(`<li>${name}</li>`).addClass('list-group-item list-group-item-action list-group-item-dark');
+//creates <li> HTML and id for friend
+//adds CSS
+    function createFriend(name, id) {
+        return $(`<li>${name}</li>`).addClass('list-group-item list-group-item-action list-group-item-dark').attr('id', id);    
     }
 
 
